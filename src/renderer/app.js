@@ -70,7 +70,7 @@ async function openDetail(id) {
   $('detailBody').innerHTML = `
     ${row('Utilizador', escapeHtml(e.username))}
     ${row('Password', secret('password'), true)}
-    ${row('Comando', e.command ? `<div class="secret-row"><span class="detail-value secret-value">${escapeHtml(e.command)}</span><button class="copy-btn" data-copy="command">Copiar</button></div>` : '')}
+    ${row('Comando', e.command ? `<div class="secret-row"><span class="detail-value secret-value">${escapeHtml(e.command)}</span><button class="copy2-btn" data-copy="command">Copiar</button></div>` : '')}
     ${row('URL', e.url ? `<a href="#" id="detailUrl">${escapeHtml(e.url)}</a>` : '')}
     ${row('Tags', escapeHtml((e.tags||[]).join(', ')))}
     ${row('Notas', escapeHtml(e.notes))}`;
