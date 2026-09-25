@@ -1,0 +1,5 @@
+node_modules/
+vault.enc
+vault.enc.bak
+*.tmp
+.DS_Store

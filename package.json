@@ -1,0 +1,21 @@
+{
+  "name": "password-vault",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Password and command vault with Electron GUI and encrypted local storage.",
+  "main": "src/main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node tests/test-vault.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "argon2": "^0.44.0"
+  },
+  "devDependencies": {
+    "electron": "^44.4.5"
+  }
+}
