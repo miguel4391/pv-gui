@@ -34,7 +34,11 @@ function filteredEntries() {
 }
 
 function render() {
-  const list = filteredEntries();
+  const list = filteredEntries().sort((a, b) =>
+    (a.title || '').localeCompare(b.title || '', 'pt-PT', {
+      sensitivity: 'base'
+    })
+  );
   $('entryCount').textContent = `${list.length} ${list.length === 1 ? 'entrada' : 'entradas'}`;
   $('entryList').innerHTML = list.map(e => `
     <article class="entry-card" data-id="${escapeHtml(e.id)}">
