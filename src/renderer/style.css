@@ -482,6 +482,13 @@ button {
     border-radius: 6px;
     font-size: 11px
 }
+.copy-btn:active{
+    background: #b9b4b4;
+}
+
+.copy2-btn:active{
+    background: #b9b4b4;
+}
 
 
 .settings-section {
