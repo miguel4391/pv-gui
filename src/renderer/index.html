@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Vault</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <section id="lockScreen" class="screen">
+      <div class="lock-card">
+        <div class="logo">🔐</div>
+        <h1>Password Vault</h1>
+        <p id="lockSubtitle">Introduza a sua master password</p>
+        <form id="unlockForm">
+          <label for="masterPassword">Master password</label>
+          <input id="masterPassword" type="password" autocomplete="current-password" autofocus>
+          <p id="lockError" class="error hidden"></p>
+          <button class="primary full" type="submit">Desbloquear</button>
+        </form>
+        <div id="createHint" class="create-hint hidden">Este é o primeiro arranque. Será criado um novo cofre.</div>
+      </div>
+    </section>
+
+    <section id="vaultScreen" class="hidden">
+      <aside class="sidebar">
+        <div class="brand"><span>🔐</span><strong>Password Vault</strong></div>
+        <div class="nav-title">COFRE</div>
+        <button class="nav-item active" data-filter="all">▣ <span>Todas as entradas</span></button>
+        <button class="nav-item" data-filter="favorites">★ <span>Favoritos</span></button>
+        <button class="nav-item" data-filter="passwords">🔑 <span>Passwords</span></button>
+        <button class="nav-item" data-filter="commands">⌘ <span>Comandos</span></button>
+        <div class="sidebar-bottom">
+          <button class="nav-item" id="settingsBtn">⚙ <span>Definições</span></button>
+          <button class="nav-item" id="lockBtn">🔒 <span>Bloquear</span></button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <h2>As minhas credenciais</h2>
+            <p id="entryCount">0 entradas</p>
+          </div>
+          <div class="top-actions">
+            <div class="search-box"><span>⌕</span><input id="searchInput" placeholder="Pesquisar..." autocomplete="off"></div>
+            <button class="primary" id="newEntryBtn">＋ Nova entrada</button>
+          </div>
+        </header>
+
+        <div id="entryList" class="entry-list"></div>
+        <div id="emptyState" class="empty hidden"><div class="empty-icon">🔐</div><h3>Nenhuma entrada</h3><p>Crie a sua primeira credencial para começar.</p><button class="primary" id="emptyNewBtn">＋ Nova entrada</button></div>
+      </main>
+    </section>
+
+    <div id="modalBackdrop" class="modal-backdrop hidden">
+      <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-header"><div><h3 id="modalTitle">Nova entrada</h3><p id="modalSubtitle">Guarde uma credencial de forma segura.</p></div><button class="icon-btn" id="closeModal">×</button></div>
+        <form id="entryForm">
+          <input type="hidden" id="entryId">
+          <div class="form-grid">
+            <div class="field wide"><label>Título *</label><input id="fTitle" required placeholder="Ex.: Microsoft 365"></div>
+            <div class="field"><label>Utilizador</label><input id="fUsername" autocomplete="off"></div>
+            <div class="field"><label>Password</label><div class="password-field"><input id="fPassword" type="password" autocomplete="new-password"><button type="button" class="mini-btn" id="togglePassword">Mostrar</button></div></div>
+            <div class="field wide"><label>URL</label><input id="fUrl" placeholder="https://..."></div>
+            <div class="field wide"><label>Comando</label><input id="fCommand" placeholder="Ex.: ssh user@server"></div>
+            <div class="field wide"><label>Tags</label><input id="fTags" placeholder="servidor, trabalho, ssh"></div>
+            <div class="field wide"><label>Notas</label><textarea id="fNotes" rows="4"></textarea></div>
+          </div>
+          <div id="formError" class="error hidden"></div>
+          <div class="modal-footer"><button type="button" class="secondary" id="cancelModal">Cancelar</button><button class="primary" type="submit">Guardar</button></div>
+        </form>
+      </div>
+    </div>
+
+    <div id="detailBackdrop" class="modal-backdrop hidden">
+      <div class="modal detail-modal">
+        <div class="modal-header"><div><h3 id="detailTitle"></h3><p id="detailMeta"></p></div><button class="icon-btn" id="closeDetail">×</button></div>
+        <div id="detailBody"></div>
+        <div class="modal-footer"><button class="secondary" id="detailEdit">Editar</button><button class="danger" id="detailDelete">Apagar</button></div>
+      </div>
+    </div>
+
+    <div id="settingsBackdrop" class="modal-backdrop hidden">
+      <div class="modal">
+        <div class="modal-header"><div><h3>Definições</h3><p>Configuração do cofre.</p></div><button class="icon-btn" id="closeSettings">×</button></div>
+        <div class="settings-section"><h4>Segurança</h4><p>Altere a master password. O conteúdo do cofre será novamente cifrado com uma nova chave.</p><button class="secondary" id="changeMasterBtn">Alterar master password</button></div>
+        <div class="settings-section"><h4>Ficheiro do cofre</h4><code id="vaultPath"></code></div>
+      </div>
+    </div>
+
+    <div id="changePasswordBackdrop" class="modal-backdrop hidden">
+      <div class="modal change-password-modal">
+        <div class="modal-header">
+          <div><h3>Alterar master password</h3><p>A nova password será usada no próximo desbloqueio.</p></div>
+          <button class="icon-btn" id="closeChangePassword">×</button>
+        </div>
+        <form id="changePasswordForm">
+          <div class="field">
+            <label for="currentMasterPassword">Master password atual</label>
+            <input id="currentMasterPassword" type="password" autocomplete="current-password" required>
+          </div>
+          <div class="field">
+            <label for="newMasterPassword">Nova master password</label>
+            <input id="newMasterPassword" type="password" autocomplete="new-password" minlength="12" required>
+          </div>
+          <div class="field">
+            <label for="confirmMasterPassword">Confirmar nova master password</label>
+            <input id="confirmMasterPassword" type="password" autocomplete="new-password" minlength="12" required>
+          </div>
+          <div id="changePasswordError" class="error hidden"></div>
+          <div class="modal-footer">
+            <button type="button" class="secondary" id="cancelChangePassword">Cancelar</button>
+            <button class="primary" type="submit">Alterar password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
