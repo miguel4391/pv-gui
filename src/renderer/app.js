@@ -10,7 +10,7 @@ async function boot() {
   if (!status.exists) $('createHint').classList.remove('hidden');
 }
 
-function showVault() { $('lockScreen').classList.add('hidden'); $('vaultScreen').classList.remove('hidden'); }
+function showVault() { $('lockScreen').classList.add('hidden'); $('vaultScreen').classList.remove('hidden'); resetInactivityTimer(); }
 function showError(message) { $('lockError').textContent = message; $('lockError').classList.remove('hidden'); }
 
 async function unlock(event) {
@@ -147,6 +147,28 @@ function showChangePasswordError(message) {
   $('changePasswordError').classList.remove('hidden');
 }
 
+const INACTIVITY_TIMEOUT_MS = 60 * 1000; // Tempo de inatividade antes de bloquear o cofre (1 minuto)
+let inactivityTimer = null;
+
+function isUnlocked() { return !$('vaultScreen').classList.contains('hidden'); }
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  if (isUnlocked()) inactivityTimer = setTimeout(lockVault, INACTIVITY_TIMEOUT_MS);
+}
+
+async function lockVault() {
+  clearTimeout(inactivityTimer);
+  await window.vaultAPI.lock();
+  entries = []; currentDetailId = null;
+  ['modalBackdrop','detailBackdrop','settingsBackdrop','changePasswordBackdrop'].forEach(id => $(id).classList.add('hidden'));
+  $('entryForm').reset(); $('changePasswordForm').reset(); $('detailBody').innerHTML = ''; $('entryList').innerHTML = '';
+  $('vaultScreen').classList.add('hidden'); $('lockScreen').classList.remove('hidden');
+  $('masterPassword').value = ''; $('masterPassword').focus();
+}
+
+['mousemove','mousedown','keydown','wheel','touchstart','scroll'].forEach(ev => window.addEventListener(ev, resetInactivityTimer, { passive: true, capture: true }));
+
 $('unlockForm').addEventListener('submit', unlock);
 $('newEntryBtn').addEventListener('click', () => openEntryModal()); $('emptyNewBtn').addEventListener('click', () => openEntryModal());
 $('entryForm').addEventListener('submit', saveEntry);
@@ -154,7 +176,7 @@ $('closeModal').addEventListener('click', () => $('modalBackdrop').classList.add
 $('closeDetail').addEventListener('click', () => $('detailBackdrop').classList.add('hidden')); $('detailEdit').addEventListener('click', async () => { const e=await window.vaultAPI.get(currentDetailId); $('detailBackdrop').classList.add('hidden'); openEntryModal(e); }); $('detailDelete').addEventListener('click', deleteCurrent);
 $('togglePassword').addEventListener('click', () => { const input=$('fPassword'); const visible=input.type==='text'; input.type=visible?'password':'text'; $('togglePassword').textContent=visible?'Mostrar':'Ocultar'; });
 $('searchInput').addEventListener('input', render);
-$('lockBtn').addEventListener('click', async () => { await window.vaultAPI.lock(); entries=[]; $('vaultScreen').classList.add('hidden'); $('lockScreen').classList.remove('hidden'); $('masterPassword').value=''; $('masterPassword').focus(); });
+$('lockBtn').addEventListener('click', lockVault);
 $('settingsBtn').addEventListener('click', async () => { const s=await window.vaultAPI.status(); $('vaultPath').textContent=s.path; $('settingsBackdrop').classList.remove('hidden'); });
 $('closeSettings').addEventListener('click', () => $('settingsBackdrop').classList.add('hidden'));
 $('changeMasterBtn').addEventListener('click', openChangePassword);
