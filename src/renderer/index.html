@@ -87,6 +87,7 @@
       <div class="modal">
         <div class="modal-header"><div><h3>Definições</h3><p>Configuração do cofre.</p></div><button class="icon-btn" id="closeSettings">×</button></div>
         <div class="settings-section"><h4>Segurança</h4><p>Altere a master password. O conteúdo do cofre será novamente cifrado com uma nova chave.</p><button class="secondary" id="changeMasterBtn">Alterar master password</button></div>
+        <div class="settings-section"><h4>Bloqueio automático</h4><p>O cofre é bloqueado após este período sem atividade (1 a 120 minutos).</p><div class="inactivity-setting"><input id="inactivityMinutes" type="number" min="1" max="120" step="1"><span>minutos</span><button class="secondary" id="saveInactivityBtn">Guardar</button></div><div id="inactivityError" class="error hidden"></div></div>
         <div class="settings-section"><h4>Ficheiro do cofre</h4><code id="vaultPath"></code></div>
       </div>
     </div>

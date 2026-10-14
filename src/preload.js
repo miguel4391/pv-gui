@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld('vaultAPI', {
   remove: id => ipcRenderer.invoke('vault:delete', id),
   copy: (id, field) => ipcRenderer.invoke('vault:copy', id, field),
   changeMaster: (currentPassword, newPassword) => ipcRenderer.invoke('vault:change-master', currentPassword, newPassword),
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  setSettings: changes => ipcRenderer.invoke('settings:set', changes),
   openUrl: url => ipcRenderer.invoke('system:open-url', url),
   confirmDelete: title => ipcRenderer.invoke('system:confirm-delete', title)
 });

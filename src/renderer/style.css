@@ -566,6 +566,24 @@ button {
     color: #667085
 }
 
+.inactivity-setting {
+    display: flex;
+    align-items: center;
+    gap: 10px
+}
+
+.inactivity-setting input {
+    width: 90px;
+    padding: 9px 11px;
+    border: 1px solid #d0d5dd;
+    border-radius: 9px
+}
+
+.inactivity-setting span {
+    font-size: 13px;
+    color: #667085
+}
+
 .settings-section code {
     font-size: 11px;
     color: #64748b;

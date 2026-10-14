@@ -1,6 +1,24 @@
 const { app, BrowserWindow, ipcMain, dialog, clipboard, shell } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const vault = require('./vault-core');
+
+const DEFAULT_SETTINGS = { inactivityMinutes: 1 };
+function getSettingsFile() { return path.join(path.dirname(vault.getVaultFile()), 'settings.json'); }
+function readSettings() {
+  try { return { ...DEFAULT_SETTINGS, ...JSON.parse(fs.readFileSync(getSettingsFile(), 'utf8')) }; }
+  catch { return { ...DEFAULT_SETTINGS }; }
+}
+function writeSettings(changes) {
+  const settings = readSettings();
+  if ('inactivityMinutes' in changes) {
+    const minutes = Number(changes.inactivityMinutes);
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 120) throw new Error('O tempo de inatividade deve ser um número inteiro entre 1 e 120 minutos.');
+    settings.inactivityMinutes = minutes;
+  }
+  fs.writeFileSync(getSettingsFile(), JSON.stringify(settings, null, 2));
+  return settings;
+}
 
 let mainWindow;
 let session = null;
@@ -37,6 +55,8 @@ ipcMain.handle('vault:update', async (_, id, data) => vault.updateEntry(requireS
 ipcMain.handle('vault:delete', async (_, id) => vault.deleteEntry(requireSession(), id));
 ipcMain.handle('vault:copy', (_, id, field) => { const value = vault.getSecret(requireSession(), id, field); clipboard.writeText(value); return true; });
 ipcMain.handle('vault:change-master', async (_, currentPassword, newPassword) => vault.changeMasterPassword(requireSession(), currentPassword, newPassword));
+ipcMain.handle('settings:get', () => readSettings());
+ipcMain.handle('settings:set', (_, changes) => writeSettings(changes || {}));
 ipcMain.handle('system:open-url', async (_, url) => { if (!/^https?:\/\//i.test(url)) throw new Error('URL inválido.'); await shell.openExternal(url); return true; });
 ipcMain.handle('system:confirm-delete', async (_, title) => { const result = await dialog.showMessageBox(mainWindow, { type: 'warning', buttons: ['Cancelar', 'Apagar'], defaultId: 0, cancelId: 0, title: 'Apagar entrada', message: `Apagar "${title}"?`, detail: 'Esta operação não pode ser anulada.' }); return result.response === 1; });
 
